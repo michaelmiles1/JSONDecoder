@@ -23,30 +23,37 @@ struct Type: Codable {
 class PokemonTableViewController: UITableViewController {
     
     var pokemonArray = [Pokemon]()
+    var loading = true
+    var pokemonCount = 10
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        for i in stride(from: 1, to: pokemonCount + 1, by: 1) {
+            getPokemon(withID: i)
+        }
     }
 
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 5
+        if loading {
+            return 1
+        } else {
+            return pokemonArray.count
+        }
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "pokemonCell", for: indexPath)
-
-        //CONFIGURE CELL WITH DECODED DATA
-        getPokemon(withID: indexPath.row + 1)
         
-        let poke = pokemonArray[indexPath.row]
+        if loading {
+            cell.textLabel?.text = "Loading..."
+        } else {
+            let poke = pokemonArray[indexPath.row]
+            cell.textLabel?.text = poke.name
+//            cell.detailTextLabel?.text = poke.types.map {($0 as? String) ?? "No type available"}.compactMap({$0}).joined(separator: ",")
+        }
 
         return cell
     }
@@ -57,13 +64,17 @@ class PokemonTableViewController: UITableViewController {
         guard let url = URL(string: "https://pokeapi.co/api/v2/pokemon/\(id)") else {
             fatalError("URL guard stmt failed")
         }
-        URLSession.shared.dataTask(with: url) { (data, response, error) in
+        URLSession.shared.dataTask(with: url) { [weak self] (data, response, error) in
             //HANDLE DECODING HERE
             if let data = data {
                 guard let pokemon = try? JSONDecoder().decode(Pokemon.self, from: data) else {
                     fatalError("Error decoding data")
                 }
                 self?.pokemonArray.append(pokemon)
+            }
+            self?.loading = false
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
             }
         }.resume()
     }
