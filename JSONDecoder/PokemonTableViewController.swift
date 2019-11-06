@@ -8,7 +8,21 @@
 
 import UIKit
 
+//SET UP STRUCT (USE http://app.quicktype.io/ if needed)
+struct Pokemon: Codable {
+    let name: String
+    let types: [TypeElement]
+}
+struct TypeElement: Codable {
+    let type: Type
+}
+struct Type: Codable {
+    let name: String
+}
+
 class PokemonTableViewController: UITableViewController {
+    
+    var pokemonArray = [Pokemon]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,13 +37,16 @@ class PokemonTableViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 20
+        return 5
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "pokemonCell", for: indexPath)
 
         //CONFIGURE CELL WITH DECODED DATA
+        getPokemon(withID: indexPath.row + 1)
+        
+        let poke = pokemonArray[indexPath.row]
 
         return cell
     }
@@ -42,6 +59,12 @@ class PokemonTableViewController: UITableViewController {
         }
         URLSession.shared.dataTask(with: url) { (data, response, error) in
             //HANDLE DECODING HERE
+            if let data = data {
+                guard let pokemon = try? JSONDecoder().decode(Pokemon.self, from: data) else {
+                    fatalError("Error decoding data")
+                }
+                self?.pokemonArray.append(pokemon)
+            }
         }.resume()
     }
 
