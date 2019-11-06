@@ -8,6 +8,8 @@
 
 import UIKit
 
+//SET UP STRUCT (USE http://app.quicktype.io/ if needed)
+
 class PokemonTableViewController: UITableViewController {
 
     override func viewDidLoad() {
