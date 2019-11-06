@@ -11,7 +11,12 @@ import UIKit
 //SET UP STRUCT (USE http://app.quicktype.io/ if needed)
 struct Pokemon: Codable {
     let name: String
-    let types: [TypeElement]
+    let typeArray: [TypeElement]
+    
+    enum CodingKeys: String, CodingKey {
+        case name
+        case typeArray = "types"
+    }
 }
 struct TypeElement: Codable {
     let type: Type
@@ -52,7 +57,7 @@ class PokemonTableViewController: UITableViewController {
         } else {
             let poke = pokemonArray[indexPath.row]
             cell.textLabel?.text = poke.name
-//            cell.detailTextLabel?.text = poke.types.map {($0 as? String) ?? "No type available"}.compactMap({$0}).joined(separator: ",")
+            cell.detailTextLabel?.text = poke.typeArray.compactMap({$0.type.name}).joined(separator: ",")
         }
 
         return cell
