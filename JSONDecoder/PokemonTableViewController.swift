@@ -8,28 +8,35 @@
 
 import UIKit
 
-//SET UP STRUCT (USE http://app.quicktype.io/ if needed)
 struct Pokemon: Codable {
     let name: String
     let typeArray: [TypeElement]
     
     enum CodingKeys: String, CodingKey {
-        case name
         case typeArray = "types"
+        case name
     }
 }
 struct TypeElement: Codable {
-    let type: Type
+    let element: Type
+    
+    enum CodingKeys: String, CodingKey {
+        case element = "type"
+    }
 }
 struct Type: Codable {
-    let name: String
+    let elementName: String
+    
+    enum CodingKeys: String, CodingKey {
+        case elementName = "name"
+    }
 }
 
 class PokemonTableViewController: UITableViewController {
     
-    var pokemonArray = [Pokemon]()
-    var loading = true
-    var pokemonCount = 10
+    private var pokemonArray = [Pokemon]()
+    private var loading = true
+    private var pokemonCount = 9
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,7 +64,7 @@ class PokemonTableViewController: UITableViewController {
         } else {
             let poke = pokemonArray[indexPath.row]
             cell.textLabel?.text = poke.name
-            cell.detailTextLabel?.text = poke.typeArray.compactMap({$0.type.name}).joined(separator: ",")
+            cell.detailTextLabel?.text = poke.typeArray.compactMap({$0.element.elementName}).joined(separator: ",")
         }
 
         return cell
@@ -73,7 +80,7 @@ class PokemonTableViewController: UITableViewController {
             //HANDLE DECODING HERE
             if let data = data {
                 guard let pokemon = try? JSONDecoder().decode(Pokemon.self, from: data) else {
-                    fatalError("Error decoding data")
+                    fatalError("Error decoding data \(error!)")
                 }
                 self?.pokemonArray.append(pokemon)
             }
